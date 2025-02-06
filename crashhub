@@ -1,0 +1,492 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Crash Hub 💥",
+   Icon = bomb, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Crash Hub 💥",
+   LoadingSubtitle = "by crash_5374",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Crash Hub 💥",
+      Subtitle = "Key System",
+      Note = "crash is the key.", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = false, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"crash"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local UniversalPlayerTab = Window:CreateTab("Universal Player", 4483362458) -- Title, Image
+
+local Slider = UniversalPlayerTab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {0, 100},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1",
+   Callback = function(Value)
+      local player = game.Players.LocalPlayer
+      if player and player.Character then
+         local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+         if humanoid then
+            humanoid.WalkSpeed = Value
+         end
+      end
+   end,
+})
+
+local InfiniteJump = UniversalPlayerTab:CreateButton({
+   Name = "Toggle Infinite Jump",
+   Callback = function()
+      local infiniteJumpEnabled = false
+      game:GetService("UserInputService").JumpRequest:Connect(function()
+         if infiniteJumpEnabled then
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+               player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+         end
+      end)
+      infiniteJumpEnabled = not infiniteJumpEnabled
+   end,
+})
+
+local Button = UniversalPlayerTab:CreateButton({
+    Name = "Fly GUI V3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    end
+})
+
+local TOHTab = Window:CreateTab("TOH ONLY (TOOLS)", 4483362458) -- Title, Image
+
+local JumpCButton = TOHTab:CreateButton({
+   Name = "Get Jump Coil",
+   Callback = function()
+   game.ReplicatedStorage.Gear.jump.Parent = game.Players.LocalPlayer.Backpack
+   end,
+})
+
+local GravityCButton = TOHTab:CreateButton({
+   Name = "Get Gravity Coil",
+   Callback = function()
+  game.ReplicatedStorage.Gear.gravity.Parent = game.Players.LocalPlayer.Backpack
+   end,
+})
+
+local ColaButton = TOHTab:CreateButton({
+   Name = "Get Cola",
+   Callback = function()
+   game.ReplicatedStorage.Gear.cola.Parent = game.Players.LocalPlayer.Backpack
+   end,
+})
+
+local FusionCButton = TOHTab:CreateButton({
+   Name = "Get Fusion Coil",
+   Callback = function()
+  game.ReplicatedStorage.Gear.fusion.Parent = game.Players.LocalPlayer.Backpack
+   end,
+})
+
+local ScreenTab = Window:CreateTab("Screen", 4483362458) -- Title, Image
+
+local FBButton = ScreenTab:CreateButton({
+   Name = "Fullbright",
+   Callback = function()
+  local Lighting = game:GetService("Lighting")
+
+-- Function to enable Fullbright
+local function enableFullbright()
+    Lighting.Brightness = 2
+    Lighting.ClockTime = 12 -- Midday
+    Lighting.FogEnd = 1e10 -- Removes fog
+    Lighting.GlobalShadows = false
+    Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255) -- Makes ambient lighting bright
+end
+
+-- Enable Fullbright immediately
+enableFullbright()
+
+-- Automatically override any lighting changes
+Lighting.Changed:Connect(enableFullbright)
+   end,
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local noclipEnabled = false
+
+-- Function to enable or disable Noclip
+local function setNoclip(state)
+    noclipEnabled = state
+end
+
+-- Function to smoothly re-enable collisions
+local function resetCollisions()
+    if Character then
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") and not part.CanCollide then
+                part.CanCollide = true
+            end
+        end
+    end
+end
+
+-- Continuously disable collisions while Noclip is active
+RunService.Stepped:Connect(function()
+    if noclipEnabled and Character and Character:FindFirstChild("HumanoidRootPart") then
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    elseif not noclipEnabled then
+        -- Add a small delay to smooth out the collision reset when Noclip is turned off
+        wait(0.1)  -- Adjust the delay as needed
+        resetCollisions()
+    end
+end)
+
+-- Create a toggle in your hub under the UniversalPlayerTab
+local Toggle = UniversalPlayerTab:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Flag = "Toggle1", -- Unique identifier for the toggle
+    Callback = function(Value)
+        setNoclip(Value) -- Enable or disable Noclip based on toggle state
+    end,
+})
+
+-- Example function that resets Noclip and updates the toggle to off
+local function resetNoclip()
+    setNoclip(false)    -- Disable Noclip
+    Toggle:Set(false)   -- Reset the toggle to off
+end
+
+local LocateTab = Window:CreateTab("Location", 4483362458) -- Title, Image
+
+local TPGUIButton = LocateTab:CreateButton({
+   Name = "Teleport GUI",
+   Callback = function()
+  -- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local GuiService = game:GetService("GuiService")
+
+-- Create a basic screen GUI with input field and teleport button
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = LocalPlayer.PlayerGui
+ScreenGui.Name = "TeleportGUI"
+
+-- Frame for positioning the teleport UI
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundTransparency = 0.5
+MainFrame.Parent = ScreenGui
+
+-- Title label for the teleport GUI
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "Teleport to Player"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBold -- Gotham Bold font
+Title.BackgroundTransparency = 1
+Title.Parent = MainFrame
+
+-- TextBox for typing part of a player's name
+local PlayerNameBox = Instance.new("TextBox")
+PlayerNameBox.Size = UDim2.new(0, 200, 0, 40)
+PlayerNameBox.Position = UDim2.new(0.5, -100, 0, 50)
+PlayerNameBox.PlaceholderText = "Enter part of player's name"
+PlayerNameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerNameBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+PlayerNameBox.TextSize = 18
+PlayerNameBox.Font = Enum.Font.GothamBold -- Gotham Bold font
+PlayerNameBox.ClearTextOnFocus = true
+PlayerNameBox.Parent = MainFrame
+
+-- Teleport Button
+local TeleportButton = Instance.new("TextButton")
+TeleportButton.Size = UDim2.new(0, 200, 0, 40)
+TeleportButton.Position = UDim2.new(0.5, -100, 0, 100)
+TeleportButton.Text = "Teleport"
+TeleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black button
+TeleportButton.TextSize = 18
+TeleportButton.Font = Enum.Font.GothamBold -- Gotham Bold font
+TeleportButton.Parent = MainFrame
+
+-- Function to teleport to player by partial name match
+TeleportButton.MouseButton1Click:Connect(function()
+    local searchName = PlayerNameBox.Text:lower()
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name:lower():find(searchName) then  -- Find the player by partial name match
+            -- Ensure we don't teleport to ourselves
+            if player ~= LocalPlayer then
+                local character = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    -- Teleport to the player's position
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame
+                    return  -- Teleport to first match and exit
+                end
+            end
+        end
+    end
+
+    -- If no match is found, print a message
+    print("No player found with that name!")
+end)
+
+-- Variables for dragging the GUI
+local dragSpeed = 0.1
+local dragging = false
+local dragInput, dragStart, startPos
+
+-- Function to start dragging
+local function onDragStart(input)
+    dragging = true
+    dragStart = input.Position
+    startPos = MainFrame.Position
+    input.Changed:Connect(function()
+        if dragging then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Function to stop dragging
+local function onDragEnd()
+    dragging = false
+end
+
+-- Make the title bar draggable
+Title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        onDragStart(input)
+    end
+end)
+
+Title.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        onDragEnd()
+    end
+end)
+   end,
+})
+
+local ResetLightingButton = ScreenTab:CreateButton({
+    Name = "Reset Lighting",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = true
+        Lighting.ClockTime = 14 -- Default time
+    end,
+})
+
+local BlurScreenButton = ScreenTab:CreateButton({
+    Name = "Blur Screen",
+    Callback = function()
+        local Blur = Instance.new("BlurEffect")
+        Blur.Size = 24 -- Adjust blur intensity (higher = more blur)
+        Blur.Parent = game:GetService("Lighting")
+    end,
+})
+
+local RemoveBlurButton = ScreenTab:CreateButton({
+    Name = "Remove Blur",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        for _, effect in pairs(Lighting:GetChildren()) do
+            if effect:IsA("BlurEffect") then
+                effect:Destroy()
+            end
+        end
+    end,
+})
+
+local ESPToggle = LocateTab:CreateToggle({
+   Name = "ESP Toggle",
+   CurrentValue = false,
+   Flag = "Toggle2", -- Unique identifier for the toggle
+   Callback = function(Value)
+       if Value then
+           loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Universal-ESP-Script-16881"))()
+           print("ESP Enabled")
+       else
+           -- Since the ESP script doesn’t come with a built-in disable function,
+           -- you may need to restart the server or find a way to manually remove it.
+           print("ESP Disabled (restart required to fully disable)")
+       end
+   end,
+})
+
+local FlingTab = Window:CreateTab("Fling", 4483362458) -- Title, Image
+
+local Button = FlingTab:CreateButton({
+   Name = "FE Fling GUI",
+   Callback = function()
+  game:GetService("StarterGui"):SetCore("SendNotification", { 
+
+	Title = "Archived by toriko ;v";
+
+	Text = "All hail Toriko the certified ball sucker";})
+
+Duration = 90;
+
+local lp = game:FindService("Players").LocalPlayer
+
+local function gplr(String)
+	local Found = {}
+	local strl = String:lower()
+	if strl == "all" then
+		for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+			table.insert(Found,v)
+		end
+	elseif strl == "others" then
+		for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+			if v.Name ~= lp.Name then
+				table.insert(Found,v)
+			end
+		end 
+	elseif strl == "me" then
+		for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+			if v.Name == lp.Name then
+				table.insert(Found,v)
+			end
+		end 
+	else
+		for i,v in pairs(game:FindService("Players"):GetPlayers()) do
+			if v.Name:lower():sub(1, #String) == String:lower() then
+				table.insert(Found,v)
+			end
+		end 
+	end
+	return Found 
+end
+
+local function notif(str,dur)
+	game:FindService("StarterGui"):SetCore("SendNotification", {
+		Title = "yeet gui",
+		Text = str,
+		Icon = "rbxassetid://2005276185",
+		Duration = dur or 3
+	})
+end
+
+--// sds
+
+local h = Instance.new("ScreenGui")
+local Main = Instance.new("ImageLabel")
+local Top = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local TextBox = Instance.new("TextBox")
+local TextButton = Instance.new("TextButton")
+
+h.Name = "h"
+h.Parent = game:GetService("CoreGui")
+h.ResetOnSpawn = false
+
+Main.Name = "Main"
+Main.Parent = h
+Main.Active = true
+Main.Draggable = true
+Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Main.BorderSizePixel = 0
+Main.Position = UDim2.new(0.174545452, 0, 0.459574461, 0)
+Main.Size = UDim2.new(0, 454, 0, 218)
+Main.Image = "rbxassetid://2005276185"
+
+Top.Name = "Top"
+Top.Parent = Main
+Top.BackgroundColor3 = Color3.fromRGB(57, 57, 57)
+Top.BorderSizePixel = 0
+Top.Size = UDim2.new(0, 454, 0, 44)
+
+Title.Name = "Title"
+Title.Parent = Top
+Title.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0, 0, 0.295454562, 0)
+Title.Size = UDim2.new(0, 454, 0, 30)
+Title.Font = Enum.Font.SourceSans
+Title.Text = "FE Yeet Gui (trollface edition)"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.TextSize = 14.000
+Title.TextWrapped = true
+
+TextBox.Parent = Main
+TextBox.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
+TextBox.BorderSizePixel = 0
+TextBox.Position = UDim2.new(0.0704845786, 0, 0.270642221, 0)
+TextBox.Size = UDim2.new(0, 388, 0, 62)
+TextBox.Font = Enum.Font.SourceSans
+TextBox.PlaceholderText = "Who do i destroy(can be shortened)"
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextScaled = true
+TextBox.TextSize = 14.000
+TextBox.TextWrapped = true
+
+TextButton.Parent = Main
+TextButton.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
+TextButton.BorderSizePixel = 0
+TextButton.Position = UDim2.new(0.10352423, 0, 0.596330225, 0)
+TextButton.Size = UDim2.new(0, 359, 0, 50)
+TextButton.Font = Enum.Font.SourceSans
+TextButton.Text = "Cheese em'"
+TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.TextScaled = true
+TextButton.TextSize = 14.000
+TextButton.TextWrapped = true
+
+TextButton.MouseButton1Click:Connect(function()
+	local Target = gplr(TextBox.Text)
+	if Target[1] then
+		Target = Target[1]
+		
+		local Thrust = Instance.new('BodyThrust', lp.Character.HumanoidRootPart)
+		Thrust.Force = Vector3.new(9999,9999,9999)
+		Thrust.Name = "YeetForce"
+		repeat
+			lp.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame
+			Thrust.Location = Target.Character.HumanoidRootPart.Position
+			game:FindService("RunService").Heartbeat:wait()
+		until not Target.Character:FindFirstChild("Head")
+	else
+		notif("Invalid player")
+	end
+end)
+
+--//fsddfsdf
+notif("Loaded successfully! Created by scuba#0001", 5)
+   end,
+})
